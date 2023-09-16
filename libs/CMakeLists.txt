@@ -1,0 +1,2 @@
+add_subdirectory(goldo_codecs)
+add_subdirectory(goldo_pb2)
