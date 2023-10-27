@@ -20,6 +20,7 @@ add_subdirectory(libs)
 
 add_executable(goldo_broker_cpp
   src/main.cpp
+  src/broker.cpp
   )
 
 ## Specify libraries to link a library or executable target against

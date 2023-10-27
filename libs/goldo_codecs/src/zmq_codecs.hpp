@@ -13,6 +13,14 @@ using namespace google::protobuf;
 class ZmqCodec;
 
 extern const std::string DontSendStr;
+extern const std::string VoidStr;
+
+enum class ZmqCodecType : uint32_t {
+  InvalidCodecType   = 0,
+  NucleoCodecType    = 1,
+  ProtobufCodecType  = 2,
+  RPLidarCodecType   = 3,
+};
 
 class ZmqCodec
 {
