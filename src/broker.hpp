@@ -8,15 +8,15 @@
 
 using namespace std;
 
-class BrokerPort;
+class BrokerInterface;
 class BrokerProcess;
 
 typedef void * ZmqContextId;
 typedef void * ZmqSocketId;
 
-class BrokerPort {
+class BrokerInterface {
 public:
-  BrokerPort(const char *_name, int _sub_port, int _pub_port, ZmqContextId _zmq_ctxt, bool _is_connect_zmq, ZmqCodec* _codec);
+  BrokerInterface(const char *_name, int _sub_port, int _pub_port, ZmqContextId _zmq_ctxt, bool _is_connect_zmq, ZmqCodec* _codec);
   int create_zmq_sockets();
   std::string& name() {return m_name;};
   ZmqSocketId sub_socket() {return m_sub_socket;};
@@ -47,7 +47,7 @@ private:
 class BrokerProcess {
 public:
   BrokerProcess();
-  int create_port(const char *_name, int _sub_port, int _pub_port, bool _is_connect_zmq, ZmqCodecType _codec_type);
+  int create_intf(const char *_name, int _sub_port, int _pub_port, bool _is_connect_zmq, ZmqCodecType _codec_type);
   int routing_func(const std::string& _topic, const std::string& _msg_type_ser, const std::string& _msg_ser);
   int admin_func(const std::string& _topic, const std::string& _msg_type_ser, const std::string& _msg_ser);
   void event_loop();
@@ -61,17 +61,17 @@ private:
 
   ZmqContextId m_zmq_context;
 
-  static const int M_PORTS_MAX = 10;
-  int m_ports_cnt;
-  BrokerPort* m_port[M_PORTS_MAX];
-  zmq_pollitem_t m_poll_items[M_PORTS_MAX];
-  map<std::string,BrokerPort*> m_name_port_map;
+  static const int M_INTFS_MAX = 10;
+  int m_intfs_cnt;
+  BrokerInterface* m_intf[M_INTFS_MAX];
+  zmq_pollitem_t m_poll_items[M_INTFS_MAX];
+  map<std::string,BrokerInterface*> m_name_intf_map;
 
 #if 1 /* FIXME : DEBUG */
-  BrokerPort* m_dbg_debug_port;
-  BrokerPort* m_dbg_strat_port;
-  BrokerPort* m_dbg_rplidar_port;
-  BrokerPort* m_dbg_nucleo_port;
+  BrokerInterface* m_dbg_debug_intf;
+  BrokerInterface* m_dbg_strat_intf;
+  BrokerInterface* m_dbg_rplidar_intf;
+  BrokerInterface* m_dbg_nucleo_intf;
 #endif
 };
 

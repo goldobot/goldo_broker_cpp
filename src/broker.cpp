@@ -20,7 +20,7 @@
 using namespace std;
 using namespace google::protobuf;
 
-BrokerPort::BrokerPort(const char *_name, int _sub_port, int _pub_port, ZmqContextId _zmq_ctxt, bool _is_connect_zmq, ZmqCodec* _codec)
+BrokerInterface::BrokerInterface(const char *_name, int _sub_port, int _pub_port, ZmqContextId _zmq_ctxt, bool _is_connect_zmq, ZmqCodec* _codec)
 {
   m_name.assign(_name);
   m_sub_socket_port = _sub_port;
@@ -32,7 +32,7 @@ BrokerPort::BrokerPort(const char *_name, int _sub_port, int _pub_port, ZmqConte
   m_codec = _codec;
 }
 
-int BrokerPort::create_zmq_sockets()
+int BrokerInterface::create_zmq_sockets()
 {
   int rc=0;
   char char_buff[64];
@@ -112,7 +112,7 @@ int BrokerPort::create_zmq_sockets()
   return 0;
 }
 
-std::tuple<const std::string&, const std::string&, const std::string&> BrokerPort::receive()
+std::tuple<const std::string&, const std::string&, const std::string&> BrokerInterface::receive()
 {
   unsigned char buff[1024];
   size_t bytes_read = 0;
@@ -189,7 +189,7 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerPor
   return {topic_s, msg_type_s, pb_msg_s};
 }
 
-int BrokerPort::send(const std::string& _topic, const std::string& _msg_type_ser, const std::string& _msg_ser)
+int BrokerInterface::send(const std::string& _topic, const std::string& _msg_type_ser, const std::string& _msg_ser)
 {
   int send_more = 0;
 
@@ -234,77 +234,84 @@ BrokerProcess::BrokerProcess()
 {
   m_stop_task = false;
   m_routing = false;
-  m_ports_cnt = 0;
+  m_intfs_cnt = 0;
   m_zmq_context = zmq_ctx_new();
 
 #if 1 /* FIXME : DEBUG */
-  m_dbg_debug_port   = nullptr;
-  m_dbg_strat_port   = nullptr;
-  m_dbg_rplidar_port = nullptr;
-  m_dbg_nucleo_port  = nullptr;
+  m_dbg_debug_intf   = nullptr;
+  m_dbg_strat_intf   = nullptr;
+  m_dbg_rplidar_intf = nullptr;
+  m_dbg_nucleo_intf  = nullptr;
 #endif
 }
 
-int BrokerProcess::create_port(const char *_name, int _sub_port, int _pub_port, bool _is_connect_zmq, ZmqCodecType _codec_type)
+int BrokerProcess::create_intf(const char *_name, int _sub_port, int _pub_port, bool _is_connect_zmq, ZmqCodecType _codec_type)
 {
   int rc=0;
+  const char *codec_type_name = nullptr;
 
   ZmqCodec* new_codec = NULL;
   switch (_codec_type) {
   case ZmqCodecType::NucleoCodecType:
     new_codec = (ZmqCodec*) new NucleoCodec(_name);
+    codec_type_name = "NucleoCodecType";
     break;
   case ZmqCodecType::ProtobufCodecType:
     new_codec = (ZmqCodec*) new ProtobufCodec(_name);
+    codec_type_name = "ProtobufCodecType";
     break;
   case ZmqCodecType::RPLidarCodecType:
     new_codec = (ZmqCodec*) new RPLidarCodec(_name);
+    codec_type_name = "RPLidarCodecType";
     break;
   default:
-    printf ("BrokerProcess::create_port() : invalid codec type\n");
+    printf ("BrokerProcess::create_intf() : invalid codec type\n");
     return -1;
   };
 
-  BrokerPort* new_port = new BrokerPort(_name, _sub_port, _pub_port, m_zmq_context, _is_connect_zmq, new_codec);
-  if (new_port == nullptr)
+  printf ("BrokerProcess::create_intf() : creating new interface '%s' (sub_port=%d, pub_port=%d, connect_type='%s', codec_type='%s')\n",
+          _name, _sub_port, _pub_port, codec_type_name, _is_connect_zmq?"CONNECT":"BIND");
+
+  BrokerInterface* new_intf = new BrokerInterface(_name, _sub_port, _pub_port, m_zmq_context, _is_connect_zmq, new_codec);
+  if (new_intf == nullptr)
   {
-    printf ("BrokerProcess::create_port() : cannot create broker port\n");
+    printf ("BrokerProcess::create_intf() : cannot create broker interface\n");
     return -1;
   }
 
-  rc = new_port->create_zmq_sockets();
+  rc = new_intf->create_zmq_sockets();
   if (rc != 0)
   {
-    printf ("BrokerProcess::create_port() : cannot create zmq sockets\n");
+    printf ("BrokerProcess::create_intf() : cannot create zmq sockets\n");
     return -1;
   }
 
-  int i=m_ports_cnt;
-  m_ports_cnt++;
+  int i=m_intfs_cnt;
+  m_intfs_cnt++;
 
-  m_port[i] = new_port;
-  m_poll_items[i].socket = new_port->sub_socket();
+  m_intf[i] = new_intf;
+  m_poll_items[i].socket = new_intf->sub_socket();
   m_poll_items[i].fd = 0;
   m_poll_items[i].events = ZMQ_POLLIN;
 
-  m_name_port_map[new_port->name()] = new_port;
+  m_name_intf_map[new_intf->name()] = new_intf;
 
 #if 1 /* FIXME : DEBUG */
-  if (new_port->name()=="debug")
+  if (new_intf->name()=="debug")
   {
-    m_dbg_debug_port   = new_port;
+    m_dbg_debug_intf   = new_intf;
   }
-  else if (new_port->name()=="strat")
+  else if (new_intf->name()=="strat")
   {
-    m_dbg_strat_port   = new_port;
+    m_dbg_strat_intf   = new_intf;
   }
-  else if (new_port->name()=="rplidar")
+  else if (new_intf->name()=="rplidar")
   {
-    m_dbg_rplidar_port = new_port;
+    m_dbg_rplidar_intf = new_intf;
   }
-  else if (new_port->name()=="nucleo")
+  else if (new_intf->name()=="nucleo")
   {
-    m_dbg_nucleo_port  = new_port;
+    m_dbg_nucleo_intf  = new_intf;
   }
 #endif
 
@@ -320,9 +327,9 @@ int BrokerProcess::admin_func(const std::string& _topic, const std::string& _msg
     google::protobuf::StringValue pb_msg_param;
     pb_msg_param.ParseFromString(_msg_ser);
     printf ("DEBUG :   param = %s\n", pb_msg_param.value().c_str());
-    if (m_dbg_strat_port!=nullptr)
+    if (m_dbg_strat_intf!=nullptr)
     {
-      m_dbg_strat_port->register_topic(pb_msg_param.value());
+      m_dbg_strat_intf->register_topic(pb_msg_param.value());
     }
   }
   else if (_topic=="broker/admin/cmd/register_forward")
@@ -350,35 +357,35 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
 {
   printf ("DEBUG : BrokerProcess::routing_func() : topic = %s\n", _topic.c_str());
 
-  if (m_dbg_strat_port!=nullptr)
+  if (m_dbg_strat_intf!=nullptr)
   {
-    if (m_dbg_strat_port->is_registered_topic(_topic))
+    if (m_dbg_strat_intf->is_registered_topic(_topic))
     {
-      m_dbg_strat_port->send(_topic, _msg_type_ser, _msg_ser);
+      m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
 
     /* FIXME : TODO : regexp topics for strat .. */
   }
 
-  if (m_dbg_nucleo_port!=nullptr)
+  if (m_dbg_nucleo_intf!=nullptr)
   {
     if (_topic.compare(0,9,"nucleo/in")==0)
     {
-      m_dbg_nucleo_port->send(_topic, _msg_type_ser, _msg_ser);
+      m_dbg_nucleo_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
   }
 
-  if (m_dbg_rplidar_port!=nullptr)
+  if (m_dbg_rplidar_intf!=nullptr)
   {
     if (_topic.compare(0,10,"rplidar/in")==0)
     {
-      m_dbg_rplidar_port->send(_topic, _msg_type_ser, _msg_ser);
+      m_dbg_rplidar_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
   }
 
-  if (m_dbg_debug_port!=nullptr)
+  if (m_dbg_debug_intf!=nullptr)
   {
-    m_dbg_debug_port->send(_topic, _msg_type_ser, _msg_ser);
+    m_dbg_debug_intf->send(_topic, _msg_type_ser, _msg_ser);
   }
 
   return 0;
@@ -403,11 +410,11 @@ void BrokerProcess::event_loop()
       old_time_ms = curr_time_ms;
     }
 
-      for (int i=0; i<m_ports_cnt; i++)
+      for (int i=0; i<m_intfs_cnt; i++)
       {
         if(m_poll_items[i].revents && ZMQ_POLLIN)
         {            
-          auto [topic_s, msg_type_s, pb_msg_s] = m_port[i]->receive();
+          auto [topic_s, msg_type_s, pb_msg_s] = m_intf[i]->receive();
           if (topic_s.compare(0,12,"broker/admin")==0)
           {
             admin_func(topic_s, msg_type_s, pb_msg_s);

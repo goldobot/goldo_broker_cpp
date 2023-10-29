@@ -31,10 +31,10 @@ int main (int argc, char **argv)
   
   printf ("TEST GOLDO_BROKER_CPP\n");
 
-  the_broker.create_port("nucleo_intf" , 3001, 3002, true , ZmqCodecType::NucleoCodecType);
-  the_broker.create_port("rplidar_intf", 3102, 3101, true , ZmqCodecType::RPLidarCodecType);
-  the_broker.create_port("strat_intf"  , 3702, 3701, false, ZmqCodecType::ProtobufCodecType);
-  the_broker.create_port("debug_intf"  , 3802, 3801, false, ZmqCodecType::ProtobufCodecType);
+  the_broker.create_intf("nucleo_intf" , 3001, 3002, true , ZmqCodecType::NucleoCodecType);
+  the_broker.create_intf("rplidar_intf", 3102, 3101, true , ZmqCodecType::RPLidarCodecType);
+  the_broker.create_intf("strat_intf"  , 3702, 3701, false, ZmqCodecType::ProtobufCodecType);
+  the_broker.create_intf("debug_intf"  , 3802, 3801, false, ZmqCodecType::ProtobufCodecType);
 
   the_broker.event_loop();
 
