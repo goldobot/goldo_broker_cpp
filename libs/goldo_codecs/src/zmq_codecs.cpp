@@ -124,7 +124,10 @@ std::tuple<const std::string&, const std::string&, const std::string&> ProtobufC
   const std::string& _msg_type_ser,
   const std::string& _pb_msg_ser)
 {
-  return {_topic, _msg_type_ser, _pb_msg_ser};
+  m_out_topic_buf        = _topic;
+  m_out_msg_type_ser_buf = _msg_type_ser;
+  m_out_msg_ser_buf      = _pb_msg_ser;
+  return {m_out_topic_buf, m_out_msg_type_ser_buf, m_out_msg_ser_buf};
 }
 
 std::tuple<const std::string&, const std::string&, const std::string&> ProtobufCodec::input (
@@ -132,7 +135,10 @@ std::tuple<const std::string&, const std::string&, const std::string&> ProtobufC
   const std::string& _msg_type_ser,
   const std::string& _pb_msg_ser)
 {
-  return {_topic, _msg_type_ser, _pb_msg_ser};
+  m_in_topic_buf        = _topic;
+  m_in_msg_type_ser_buf = _msg_type_ser;
+  m_in_msg_ser_buf      = _pb_msg_ser;
+  return {m_in_topic_buf, m_in_msg_type_ser_buf, m_in_msg_ser_buf};
 }
 
 

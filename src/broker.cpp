@@ -177,11 +177,58 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerInt
 
   printf("  ZMQ DEBUG: received message_type = %d\n", message_type);
   printf("  ");
+#endif
+
+#if 0 /* FIXME : DEBUG */
   {
-    int i;
-    for (i=0; i<(int)bytes_read_total; i++) printf ("%.2x ",buff[i]);
+    int i,j,n_bytes,n_fill;
+
+    n_bytes = (int)bytes_read_total;
+    n_fill = ((bytes_read_total/16)+1)*16;
+
+    for (i=0; i<n_bytes; i++)
+    {
+      printf ("%.2x ",buff[i]);
+      if (i%16==15)
+      {
+        for (j=15; j>=0; j--)
+        {
+          if (buff[i-j]>=0x20)
+          {
+            printf ("%c",buff[i-j]);
+          }
+          else
+          {
+            printf (".");
+          }
+        }
+        printf ("\n");
+      }
+    }
+    for (j=n_bytes; j<n_fill; j++)
+    {
+      printf ("   ");
+    }
+    for (j=n_fill-16; j<n_bytes; j++)
+    {
+      if (buff[j]>=0x20)
+      {
+        printf ("%c",buff[j]);
+      }
+      else
+      {
+        printf (".");
+      }
+    }
+
     printf ("\n");
   }
+#endif
+
+#if 0 /* FIXME : DEBUG */
+  printf ("DEBUG :   msg_part1_s = %s\n", msg_part1_s.c_str());
+  printf ("DEBUG :   msg_part2_s = %s\n", msg_part2_s.c_str());
+  printf ("DEBUG :   msg_part3_s = %s\n", msg_part3_s.c_str());
 #endif
 
   auto [topic_s, msg_type_s, pb_msg_s] = m_codec->input(msg_part1_s, msg_part2_s, msg_part3_s);
@@ -399,7 +446,7 @@ void BrokerProcess::event_loop()
 
   while(!m_stop_task)
   {
-    zmq_poll (m_poll_items, 1, 100);
+    zmq_poll (m_poll_items, m_intfs_cnt, 100);
 
     clock_gettime(1, &curr_tp);
 
@@ -410,21 +457,34 @@ void BrokerProcess::event_loop()
       old_time_ms = curr_time_ms;
     }
 
-      for (int i=0; i<m_intfs_cnt; i++)
-      {
-        if(m_poll_items[i].revents && ZMQ_POLLIN)
-        {            
-          auto [topic_s, msg_type_s, pb_msg_s] = m_intf[i]->receive();
-          if (topic_s.compare(0,12,"broker/admin")==0)
-          {
-            admin_func(topic_s, msg_type_s, pb_msg_s);
-          }
-          else if (m_routing)
-          {
-            routing_func(topic_s, msg_type_s, pb_msg_s);
-          }
+#if 0 /* FIXME : DEBUG */
+    for (int i=0; i<m_intfs_cnt; i++)
+    {
+      if(m_poll_items[i].revents && ZMQ_POLLIN)
+      {            
+        printf ("DEBUG : poll revent (%d)\n",i);
+      }
+    }
+#endif
+
+    for (int i=0; i<m_intfs_cnt; i++)
+    {
+      if(m_poll_items[i].revents && ZMQ_POLLIN)
+      {            
+        auto [topic_s, msg_type_s, pb_msg_s] = m_intf[i]->receive();
+        //printf ("DEBUG : received topic = %s\n", topic_s.c_str());
+        if (topic_s.compare(0,12,"broker/admin")==0)
+        {
+          printf ("DEBUG : received ADMIN msg\n");
+          admin_func(topic_s, msg_type_s, pb_msg_s);
+        }
+        else if (m_routing)
+        {
+          printf ("DEBUG : received NORMAL msg\n");
+          //routing_func(topic_s, msg_type_s, pb_msg_s);
         }
       }
+    }
 
     pthread_yield();
   }
