@@ -280,7 +280,7 @@ int BrokerInterface::send(const std::string& _topic, const std::string& _msg_typ
 BrokerProcess::BrokerProcess()
 {
   m_stop_task = false;
-  m_routing = false;
+  m_routing = true;
   m_intfs_cnt = 0;
   m_zmq_context = zmq_ctx_new();
 
@@ -344,19 +344,19 @@ int BrokerProcess::create_intf(const char *_name, int _sub_port, int _pub_port, 
   m_name_intf_map[new_intf->name()] = new_intf;
 
 #if 1 /* FIXME : DEBUG */
-  if (new_intf->name()=="debug")
+  if (new_intf->name()=="debug_intf")
   {
     m_dbg_debug_intf   = new_intf;
   }
-  else if (new_intf->name()=="strat")
+  else if (new_intf->name()=="strat_intf")
   {
     m_dbg_strat_intf   = new_intf;
   }
-  else if (new_intf->name()=="rplidar")
+  else if (new_intf->name()=="rplidar_intf")
   {
     m_dbg_rplidar_intf = new_intf;
   }
-  else if (new_intf->name()=="nucleo")
+  else if (new_intf->name()=="nucleo_intf")
   {
     m_dbg_nucleo_intf  = new_intf;
   }
@@ -481,7 +481,7 @@ void BrokerProcess::event_loop()
         else if (m_routing)
         {
           printf ("DEBUG : received NORMAL msg\n");
-          //routing_func(topic_s, msg_type_s, pb_msg_s);
+          routing_func(topic_s, msg_type_s, pb_msg_s);
         }
       }
     }

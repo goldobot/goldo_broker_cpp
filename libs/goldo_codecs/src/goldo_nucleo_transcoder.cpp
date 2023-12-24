@@ -110,7 +110,7 @@ public:                                                                         
   };                                                                                                                       \
   virtual std::string& transcode_and_serialize_nucleo_msg ();                                                              \
 };                                                                                                                         \
-NucleoIn ## NAME ## Codec  NucleoIn ## NAME ( TOPIC, MSG_ID )
+NucleoIn ## NAME ## Codec  NucleoIn ## NAME ( "nucleo/in/" TOPIC, MSG_ID )
 
 
 #define NUCLEO_OUT_CODEC(NAME, PB_TYPE, TOPIC, MSG_ID) class NucleoOut ## NAME ## Codec : public NucleoOutCodec {          \
@@ -139,7 +139,7 @@ public:                                                                         
     return nucleo_out_buf;                                                                                                 \
   };                                                                                                                       \
 };                                                                                                                         \
-NucleoOut ## NAME ## Codec  NucleoOut ## NAME ( TOPIC, MSG_ID )
+NucleoOut ## NAME ## Codec  NucleoOut ## NAME ( "nucleo/out/" TOPIC, MSG_ID )
 
 
 
