@@ -1621,7 +1621,7 @@ google::protobuf::Message* NucleoOutPropulsionControllerEventCodec::transcode (c
   pb_msg.mutable_pose()->set_yaw_rate                  (my_event->pose_yaw_rate);
   pb_msg.mutable_pose()->set_acceleration              (my_event->pose_acceleration);
   pb_msg.mutable_pose()->set_angular_acceleration      (my_event->pose_angular_acceleration);
-  pb_msg.parameter                                     (my_event->parameter);
+  pb_msg.set_parameter                                 (my_event->parameter);
   pb_msg.set_data1                                     (my_event->data[0]);
   pb_msg.set_data2                                     (my_event->data[1]);
   pb_msg.set_type                                      (my_event->type);
