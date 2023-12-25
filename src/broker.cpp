@@ -242,9 +242,9 @@ int BrokerInterface::send(const std::string& _topic, const std::string& _msg_typ
 
   auto [part1_s, part2_s, part3_s] = m_codec->output(_topic, _msg_type_ser, _msg_ser);
 
-  if ((part1_s!=DontSendStr) || (part1_s!=VoidStr))
+  if ((part1_s!=DontSendStr) && (part1_s!=VoidStr))
   {
-    if ((part2_s!=DontSendStr) || (part2_s!=VoidStr) || (part3_s!=DontSendStr) || (part3_s!=VoidStr))
+    if ((part2_s!=DontSendStr) && (part2_s!=VoidStr) && (part3_s!=DontSendStr) && (part3_s!=VoidStr))
     {
       send_more = ZMQ_SNDMORE;
     }
@@ -255,9 +255,9 @@ int BrokerInterface::send(const std::string& _topic, const std::string& _msg_typ
     zmq_send (m_pub_socket, part1_s.data(), part1_s.size(), send_more);
   }
 
-  if ((part2_s!=DontSendStr) || (part2_s!=VoidStr))
+  if ((part2_s!=DontSendStr) && (part2_s!=VoidStr))
   {
-    if ((part3_s!=DontSendStr) || (part3_s!=VoidStr))
+    if ((part3_s!=DontSendStr) && (part3_s!=VoidStr))
     {
       send_more = ZMQ_SNDMORE;
     }
@@ -268,9 +268,9 @@ int BrokerInterface::send(const std::string& _topic, const std::string& _msg_typ
     zmq_send (m_pub_socket, part2_s.data(), part2_s.size(), send_more);
   }
 
-  if ((part3_s!=DontSendStr) || (part3_s!=VoidStr))
+  if ((part3_s!=DontSendStr) && (part3_s!=VoidStr))
   {
-    zmq_send (m_pub_socket, part3_s.data(), part3_s.size(), send_more);
+    zmq_send (m_pub_socket, part3_s.data(), part3_s.size(), 0);
   }
 
   return 0;
@@ -396,6 +396,16 @@ int BrokerProcess::admin_func(const std::string& _topic, const std::string& _msg
   {
     printf ("DEBUG :   received STOP\n");
     /* FIXME : TODO : STOP */
+  }
+  else if (_topic=="broker/admin/cmd/start_routing")
+  {
+    printf ("DEBUG :   received START_ROUTING\n");
+    m_routing = true;
+  }
+  else if (_topic=="broker/admin/cmd/stop_routing")
+  {
+    printf ("DEBUG :   received STOP_ROUTING\n");
+    m_routing = false;
   }
   return 0;
 }
