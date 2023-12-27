@@ -418,10 +418,33 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
   {
     if (m_dbg_strat_intf->is_registered_topic(_topic))
     {
+      printf ("DEBUG : BrokerProcess::routing_func() : REGISTERED topic.\n");
       m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
 
     /* FIXME : TODO : regexp topics for strat .. */
+#if 1 /* FIXME : DEBUG : BOUCHON */
+    if (_topic.compare(0,7,"config/")==0)
+    {
+      printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
+      m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
+    }
+    else if (_topic.compare(0,15,"robot/sequence/")==0)
+    {
+      printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
+      m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
+    }
+#endif
+
+    /* FIXME : TODO : FORWARD (i.e. resend with changed topic) */
+#if 1 /* FIXME : DEBUG : BOUCHON */
+    if (_topic.compare(0,23,"nucleo/out/os/heartbeat")==0)
+    {
+      std::string new_topic = "gui/in/heartbeat";
+      printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/os/heartbeat' -> 'gui/in/heartbeat'\n");
+      m_dbg_debug_intf->send(new_topic, _msg_type_ser, _msg_ser);
+    }
+#endif
   }
 
   if (m_dbg_nucleo_intf!=nullptr)
