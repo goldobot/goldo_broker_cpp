@@ -1844,7 +1844,7 @@ std::string& NucleoInServoMoveMultipleCodec::transcode_and_serialize_nucleo_msg 
     uint8_t servo_id = (uint8_t) nucleo_in_servo_move_multiple_msg->positions(i).servo_id();
     nucleo_in_buf.append((const char *)&servo_id, sizeof(servo_id));
 
-    uint16_t position = (uint8_t) nucleo_in_servo_move_multiple_msg->positions(i).position();
+    uint16_t position = (uint16_t) nucleo_in_servo_move_multiple_msg->positions(i).position();
     nucleo_in_buf.append((const char *)&position, sizeof(position));
   }
 
