@@ -596,7 +596,7 @@ void BrokerProcess::event_loop()
         }
         else if (m_routing)
         {
-          printf ("DEBUG : received NORMAL msg\n");
+          //printf ("DEBUG : received NORMAL msg\n");
           routing_func(topic_s, msg_type_s, pb_msg_s);
         }
       }
