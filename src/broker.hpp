@@ -42,6 +42,8 @@ private:
   ZmqCodec* m_codec;
 
   map<std::string,int> m_topics_map;
+
+  unsigned char m_receive_buff[0x100000];
 };
 
 class BrokerProcess {

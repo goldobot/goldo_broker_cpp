@@ -101,7 +101,8 @@ std::tuple<const std::string&, const std::string&, const std::string&> NucleoCod
   NucleoOutCodec* encoder = GetNucleoOutCodec((goldobot::CommMessageType)msg_type);
   if (encoder==NULL)
   {
-    cout << "NucleoCodec::input() : Error : cannot get codec for " <<  msg_type << "" << endl;
+    /* FIXME : DEBUG : TODO : bloody msg_type=122 (PropulsionPose)! */
+    if (msg_type!=122) cout << "NucleoCodec::input() : Error : cannot get codec for " <<  msg_type << "" << endl;
     return {DontSendStr, DontSendStr, DontSendStr};
   }
   const std::string &topic = encoder->codec_topic();

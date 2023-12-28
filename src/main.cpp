@@ -4,6 +4,8 @@ pkg-config --cflags --libs protobuf
 TO BUILD : 
 g++ -std=c++17 -I../libs/goldo_pb2/src -I../libs/goldo_codecs/src -c main.cpp 
 g++ -o goldo_broker_cpp main.o ../test/goldo_codecs.a ../test/goldo_pb2_cpp.a -lpthread -lprotobuf -lzmq
+TO CMAKE WITH DEBUG : 
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 */
 
 #include <errno.h>

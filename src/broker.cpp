@@ -114,7 +114,6 @@ int BrokerInterface::create_zmq_sockets()
 
 std::tuple<const std::string&, const std::string&, const std::string&> BrokerInterface::receive()
 {
-  unsigned char buff[1024];
   size_t bytes_read = 0;
   size_t bytes_read_total = 0;
   int64_t more=1;
@@ -135,25 +134,25 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerInt
   bytes_read_total = 0;
 
   {
-    bytes_read = zmq_recv(m_sub_socket, buff + bytes_read_total, sizeof(buff) - bytes_read_total, 0);
+    bytes_read = zmq_recv(m_sub_socket, m_receive_buff + bytes_read_total, sizeof(m_receive_buff) - bytes_read_total, 0);
     zmq_getsockopt(m_sub_socket, ZMQ_RCVMORE, &more, &more_size);
-    msg_part1_s.append((char *)&buff[bytes_read_total],bytes_read);
+    msg_part1_s.append((char *)&m_receive_buff[bytes_read_total],bytes_read);
     bytes_read_total += bytes_read;
   }
 
   if (more)
   {
-    bytes_read = zmq_recv(m_sub_socket, buff + bytes_read_total, sizeof(buff) - bytes_read_total, 0);
+    bytes_read = zmq_recv(m_sub_socket, m_receive_buff + bytes_read_total, sizeof(m_receive_buff) - bytes_read_total, 0);
     zmq_getsockopt(m_sub_socket, ZMQ_RCVMORE, &more, &more_size);
-    msg_part2_s.append((char *)&buff[bytes_read_total],bytes_read);
+    msg_part2_s.append((char *)&m_receive_buff[bytes_read_total],bytes_read);
     bytes_read_total += bytes_read;
   }
 
   if (more)
   {
-    bytes_read = zmq_recv(m_sub_socket, buff + bytes_read_total, sizeof(buff) - bytes_read_total, 0);
+    bytes_read = zmq_recv(m_sub_socket, m_receive_buff + bytes_read_total, sizeof(m_receive_buff) - bytes_read_total, 0);
     zmq_getsockopt(m_sub_socket, ZMQ_RCVMORE, &more, &more_size);
-    msg_part3_s.append((char *)&buff[bytes_read_total],bytes_read);
+    msg_part3_s.append((char *)&m_receive_buff[bytes_read_total],bytes_read);
     bytes_read_total += bytes_read;
   }
 
@@ -164,16 +163,16 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerInt
 
   while(more)
   {
-    bytes_read = zmq_recv(m_sub_socket, buff + bytes_read_total, sizeof(buff) - bytes_read_total, 0);
+    bytes_read = zmq_recv(m_sub_socket, m_receive_buff + bytes_read_total, sizeof(m_receive_buff) - bytes_read_total, 0);
     zmq_getsockopt(m_sub_socket, ZMQ_RCVMORE, &more, &more_size);
     /* POUBELLE! */
     bytes_read_total += bytes_read;
   }
 
 #if 0 /* FIXME : DEBUG : only for nucleo ! */
-  buff[bytes_read_total] = 0;
+  m_receive_buff[bytes_read_total] = 0;
   uint16_t message_type = 0;
-  memcpy (&message_type, &buff[2], sizeof(message_type));
+  memcpy (&message_type, &m_receive_buff[2], sizeof(message_type));
 
   printf("  ZMQ DEBUG: received message_type = %d\n", message_type);
   printf("  ");
@@ -188,14 +187,14 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerInt
 
     for (i=0; i<n_bytes; i++)
     {
-      printf ("%.2x ",buff[i]);
+      printf ("%.2x ",m_receive_buff[i]);
       if (i%16==15)
       {
         for (j=15; j>=0; j--)
         {
-          if (buff[i-j]>=0x20)
+          if (m_receive_buff[i-j]>=0x20)
           {
-            printf ("%c",buff[i-j]);
+            printf ("%c",m_receive_buff[i-j]);
           }
           else
           {
@@ -211,9 +210,9 @@ std::tuple<const std::string&, const std::string&, const std::string&> BrokerInt
     }
     for (j=n_fill-16; j<n_bytes; j++)
     {
-      if (buff[j]>=0x20)
+      if (m_receive_buff[j]>=0x20)
       {
-        printf ("%c",buff[j]);
+        printf ("%c",m_receive_buff[j]);
       }
       else
       {
@@ -412,13 +411,97 @@ int BrokerProcess::admin_func(const std::string& _topic, const std::string& _msg
 
 int BrokerProcess::routing_func(const std::string& _topic, const std::string& _msg_type_ser, const std::string& _msg_ser)
 {
-  printf ("DEBUG : BrokerProcess::routing_func() : topic = %s\n", _topic.c_str());
+  /* FIXME : DEBUG : a lot of debug printf.. */
+  bool debug_print = true;
+
+  if (_topic.compare(0,23,"nucleo/out/os/heartbeat")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,39,"nucleo/out/os/task_statistics/uart_comm")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,18,"gui/in/robot_state")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,18,"gui/in/match_timer")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,17,"nucleo/in/os/ping")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,18,"nucleo/out/os/ping")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,18,"gui/out/start_zone")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,12,"gui/out/side")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,24,"nucleo/out/sensors/state")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,22,"nucleo/out/match/timer")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,21,"rplidar/in/robot_pose")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,31,"nucleo/out/propulsion/telemetry")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,40,"nucleo/out/os/task_statistics/propulsion")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,39,"nucleo/out/propulsion/odrive/statistics")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,35,"nucleo/out/propulsion/odrive/errors")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,40,"nucleo/out/propulsion/odrive/axis_states")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,41,"nucleo/out/os/task_statistics/odrive_comm")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,30,"nucleo/out/servo/status/moving")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,30,"nucleo/out/servo/status/states")==0)
+  {
+    debug_print = false;
+  }
+  if (_topic.compare(0,10,"!DontSend!")==0)
+  {
+    debug_print = false;
+  }
+
+  if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : topic = %s\n", _topic.c_str());
 
   if (m_dbg_strat_intf!=nullptr)
   {
     if (m_dbg_strat_intf->is_registered_topic(_topic))
     {
-      printf ("DEBUG : BrokerProcess::routing_func() : REGISTERED topic.\n");
+      if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : REGISTERED topic.\n");
       m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
 
@@ -426,12 +509,12 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
 #if 1 /* FIXME : DEBUG : BOUCHON */
     if (_topic.compare(0,7,"config/")==0)
     {
-      printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
+      if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
       m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
     else if (_topic.compare(0,15,"robot/sequence/")==0)
     {
-      printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
+      if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : regexp detected.\n");
       m_dbg_strat_intf->send(_topic, _msg_type_ser, _msg_ser);
     }
 #endif
@@ -441,7 +524,7 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
     if (_topic.compare(0,23,"nucleo/out/os/heartbeat")==0)
     {
       std::string new_topic = "gui/in/heartbeat";
-      printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/os/heartbeat' -> 'gui/in/heartbeat'\n");
+      if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/os/heartbeat' -> 'gui/in/heartbeat'\n");
       m_dbg_debug_intf->send(new_topic, _msg_type_ser, _msg_ser);
     }
 #endif

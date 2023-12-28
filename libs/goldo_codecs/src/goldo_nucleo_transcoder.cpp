@@ -162,6 +162,12 @@ std::string& NucleoInOsPingCodec::transcode_and_serialize_nucleo_msg ()
   return nucleo_in_buf;
 }
 
+NUCLEO_OUT_CODEC( OsPing , google::protobuf::Empty , "os/ping" , CommMessageType::CommUartPing );
+google::protobuf::Message* NucleoOutOsPingCodec::transcode (const unsigned char* data_from_nucleo, int data_size)
+{
+  return &pb_msg;
+}
+
 NUCLEO_OUT_CODEC( OsHeapStats , goldo::nucleo::FreeRTOSHeapStats , "os/heap_stats" , CommMessageType::HeapStats );
 typedef struct xHeapStats
 {
