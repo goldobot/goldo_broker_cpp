@@ -7,6 +7,7 @@
 
 #include "goldo/rplidar.pb.h"
 #include "goldo/common/geometry.pb.h"
+#include "goldo/nucleo.pb.h"
 
 #include "goldo_nucleo_transcoder.hpp"
 
@@ -223,6 +224,42 @@ std::tuple<const std::string&, const std::string&, const std::string&> RPLidarCo
     pb_bool.ParseFromString(_pb_msg_ser);
     uint8_t val = pb_bool.value();
     param_buf.append((const char *)&val, sizeof(val));
+    return {cmd_buf, param_buf, DontSendStr};
+  }
+  else if (_topic=="rplidar/in/robot_telemetry")
+  {
+    float val;
+    cmd_byte = 8;
+    cmd_buf.append((const char *)&cmd_byte, sizeof(cmd_byte));
+    goldo::nucleo::propulsion::Telemetry pb_telemetry;
+    pb_telemetry.ParseFromString(_pb_msg_ser);
+    val = pb_telemetry.pose().position().x();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().position().y();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().yaw();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().speed();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().yaw_rate();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().acceleration();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.pose().angular_acceleration();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.left_encoder();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.right_encoder();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.left_pwm();
+    param_buf.append((const char *)&val, sizeof(val));
+    val = pb_telemetry.right_pwm();
+    param_buf.append((const char *)&val, sizeof(val));
+    int ival;
+    ival = pb_telemetry.state();
+    param_buf.append((const char *)&ival, sizeof(ival));
+    ival = pb_telemetry.error();
+    param_buf.append((const char *)&ival, sizeof(ival));
     return {cmd_buf, param_buf, DontSendStr};
   }
 

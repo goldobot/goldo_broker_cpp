@@ -527,6 +527,14 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
       if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/os/heartbeat' -> 'gui/in/heartbeat'\n");
       m_dbg_debug_intf->send(new_topic, _msg_type_ser, _msg_ser);
     }
+#if 1 /* FIXME : DEBUG : EXPERIMENTAL : disable robot_pose & use robot_telemetry instead */
+    if (_topic.compare(0,31,"nucleo/out/propulsion/telemetry")==0)
+    {
+      std::string new_topic = "rplidar/in/robot_telemetry";
+      //if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/propulsion/telemetry' -> 'rplidar/in/robot_telemetry'\n");
+      m_dbg_rplidar_intf->send(new_topic, _msg_type_ser, _msg_ser);
+    }
+#endif
 #endif
   }
 
@@ -542,7 +550,14 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
   {
     if (_topic.compare(0,10,"rplidar/in")==0)
     {
+#if 1 /* FIXME : DEBUG : EXPERIMENTAL : disable robot_pose & use robot_telemetry instead */
+      if (_topic.compare(0,21,"rplidar/in/robot_pose")==0)
+      {
+        m_dbg_rplidar_intf->send(_topic, _msg_type_ser, _msg_ser);
+      }
+#else
       m_dbg_rplidar_intf->send(_topic, _msg_type_ser, _msg_ser);
+#endif
     }
   }
 
