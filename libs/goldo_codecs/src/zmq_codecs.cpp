@@ -317,12 +317,12 @@ std::tuple<const std::string&, const std::string&, const std::string&> RPLidarCo
     size_t remain_sz = data_size;
     PB_SET_FIELD(robot_detection,uint32_t,timestamp_ms);
     PB_SET_FIELD(robot_detection,uint32_t,id);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,x,0.25e-3);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,y,0.25e-3);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,vx,1.0e-3);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,vy,1.0e-3);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,ax,1.0e-3);
-    PB_SET_FLOAT_FIELD(robot_detection,uint16_t,ay,1.0e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,x,0.25e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,y,0.25e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,vx,1.0e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,vy,1.0e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,ax,1.0e-3);
+    PB_SET_FLOAT_FIELD(robot_detection,int16_t,ay,1.0e-3);
     PB_SET_FIELD(robot_detection,uint32_t,detect_quality);
     robot_detection.SerializeToString(&pb_ser_buf);
     pb_type_buf.assign(robot_detection.GetDescriptor()->full_name().c_str());

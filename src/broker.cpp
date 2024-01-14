@@ -551,7 +551,7 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
     if (_topic.compare(0,10,"rplidar/in")==0)
     {
 #if 1 /* FIXME : DEBUG : EXPERIMENTAL : disable robot_pose & use robot_telemetry instead */
-      if (_topic.compare(0,21,"rplidar/in/robot_pose")==0)
+      if (_topic.compare(0,21,"rplidar/in/robot_pose")!=0)
       {
         m_dbg_rplidar_intf->send(_topic, _msg_type_ser, _msg_ser);
       }
