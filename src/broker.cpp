@@ -41,7 +41,7 @@ int BrokerInterface::create_zmq_sockets()
   if (m_pub_socket_port!=0)
   {
     m_pub_socket = zmq_socket(m_zmq_ctxt, ZMQ_PUB);
-    if (m_pub_socket<0) {
+    if (m_pub_socket!=0) {
       printf ("pub_socket : cannot create ZMQ_PUB socket\n");
       m_sub_socket = nullptr;
       m_pub_socket = nullptr;
@@ -76,7 +76,7 @@ int BrokerInterface::create_zmq_sockets()
   if (m_sub_socket_port!=0)
   {
     m_sub_socket = zmq_socket(m_zmq_ctxt, ZMQ_SUB);
-    if (m_sub_socket<0) {
+    if (m_sub_socket!=0) {
       printf ("sub_socket : cannot create ZMQ_SUB socket\n");
       m_sub_socket = nullptr;
       m_pub_socket = nullptr;
@@ -617,7 +617,7 @@ void BrokerProcess::event_loop()
       }
     }
 
-    pthread_yield();
+    sched_yield();
   }
 
   zmq_term(m_zmq_context);
