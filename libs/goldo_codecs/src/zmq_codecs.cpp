@@ -348,6 +348,13 @@ std::tuple<const std::string&, const std::string&, const std::string&> RPLidarCo
     pb_type_buf.assign(zones.GetDescriptor()->full_name().c_str());
     return {topic_buf, pb_type_buf, pb_ser_buf};
   }
+  case 64:
+  {
+    topic_buf.assign("rplidar/out/emergency_raise");
+    google::protobuf::Empty empty;
+    pb_type_buf.assign(empty.GetDescriptor()->full_name().c_str());
+    return {topic_buf, pb_type_buf, pb_ser_buf};
+  }
   default:
     break;
   }
