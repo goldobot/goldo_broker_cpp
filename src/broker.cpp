@@ -536,8 +536,10 @@ int BrokerProcess::routing_func(const std::string& _topic, const std::string& _m
     if (_topic.compare(0,31,"nucleo/out/propulsion/telemetry")==0)
     {
       std::string new_topic = "rplidar/in/robot_telemetry";
+      std::string new_topic_gui = "gui/in/robot_telemetry";
       //if (debug_print) printf ("DEBUG : BrokerProcess::routing_func() : FORWARDING 'nucleo/out/propulsion/telemetry' -> 'rplidar/in/robot_telemetry'\n");
       m_dbg_rplidar_intf->send(new_topic, _msg_type_ser, _msg_ser);
+      m_dbg_debug_intf->send(new_topic_gui, _msg_type_ser, _msg_ser);
     }
 #endif
   }
