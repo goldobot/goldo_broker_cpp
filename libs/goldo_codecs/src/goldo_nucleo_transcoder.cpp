@@ -15,8 +15,8 @@ ar crf goldo_pb2_cpp.a ../obj/*.o
 
 #include "message_types.hpp"
 
-#include "/usr/include/google/protobuf/empty.pb.h"
-#include "/usr/include/google/protobuf/wrappers.pb.h"
+#include <google/protobuf/empty.pb.h>
+#include <google/protobuf/wrappers.pb.h>
 #include "goldo/nucleo.pb.h"
 #include "goldo/nucleo/main.pb.h"
 #include "goldo/nucleo/gpio.pb.h"

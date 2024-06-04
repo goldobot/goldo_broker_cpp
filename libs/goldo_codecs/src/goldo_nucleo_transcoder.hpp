@@ -7,8 +7,8 @@
 
 #include "message_types.hpp"
 
-#include "/usr/include/google/protobuf/empty.pb.h"
-#include "/usr/include/google/protobuf/wrappers.pb.h"
+#include <google/protobuf/empty.pb.h>
+#include <google/protobuf/wrappers.pb.h>
 
 class NucleoInCodec;
 class NucleoOutCodec;

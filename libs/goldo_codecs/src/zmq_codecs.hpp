@@ -4,8 +4,8 @@
 #include <tuple>
 #include <string>
 
-#include "/usr/include/google/protobuf/empty.pb.h"
-#include "/usr/include/google/protobuf/wrappers.pb.h"
+#include <google/protobuf/empty.pb.h>
+#include <google/protobuf/wrappers.pb.h>
 
 using namespace std;
 using namespace google::protobuf;
