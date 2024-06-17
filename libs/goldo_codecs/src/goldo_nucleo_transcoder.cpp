@@ -1065,6 +1065,20 @@ std::string& NucleoInPropulsionEmergencyStopCodec::transcode_and_serialize_nucle
   return nucleo_in_buf;
 }
 
+NUCLEO_IN_CODEC( PropulsionRegularStop , goldo::nucleo::propulsion::CmdEmpty , "propulsion/regular_stop" , CommMessageType::PropulsionRegularStop );
+std::string& NucleoInPropulsionRegularStopCodec::transcode_and_serialize_nucleo_msg ()
+{
+  nucleo_in_buf.clear();
+
+  goldo::nucleo::propulsion::CmdEmpty* nucleo_in_propulsion_regular_stop_msg =
+    (goldo::nucleo::propulsion::CmdEmpty*) &pb_msg;
+
+  uint16_t sequence_number = (uint16_t) nucleo_in_propulsion_regular_stop_msg->sequence_number();
+  nucleo_in_buf.append((const char *)&sequence_number, sizeof(sequence_number));
+
+  return nucleo_in_buf;
+}
+
 NUCLEO_IN_CODEC( PropulsionClearError , goldo::nucleo::propulsion::CmdEmpty , "propulsion/clear_error" , CommMessageType::PropulsionClearError );
 std::string& NucleoInPropulsionClearErrorCodec::transcode_and_serialize_nucleo_msg ()
 {
